@@ -8,9 +8,17 @@ import json
 from django.utils.safestring import mark_safe
 
 def index(request):
-    document = Document.objects.get(id=4)
+    doc_id = request.GET.get('doc', '')
+
+    if doc_id:
+        document = Document.objects.get(id=doc_id)
+    else:
+        document = Document.objects.latest('id')
+        
+    print(document)
+
+    strokes_data = []
     for page in document.page_set.all():
-        strokes_data = []
         for stroke in page.stroke_set.all():
             stroke_data = []
             for dot in stroke.dot_set.all():
@@ -19,14 +27,19 @@ def index(request):
             strokes_data.append({"dots": stroke_data})
 
     json_data = {"data": strokes_data}
-    print(json_data)
+    #print(json_data)
 
     values = []
-    for field in document.page_set.first().field_set.all():
-        recognition_candidate = field.recognition_set.first().recognitioncandidate_set.first()
-        # Todo Need to set selected condidate id correctly first, ideally as a nullable foriegn key.
-        # recognition_candidate = RecognitionCandidate.objects.get(id=Recognition.objects.get(field_id=field.id).selected_candidate_id)
-        values.append(recognition_candidate.value)
+    
+    pages = document.page_set
+    if pages.exists():
+        for field in pages.first().field_set.all():
+            recognitions = field.recognition_set
+            if recognitions.exists():
+                recognition_candidate = recognitions.first().recognitioncandidate_set.first()
+                # Todo Need to set selected condidate id correctly first, ideally as a nullable foriegn key.
+                # recognition_candidate = RecognitionCandidate.objects.get(id=Recognition.objects.get(field_id=field.id).selected_candidate_id)
+                values.append(recognition_candidate.value)
 
     print(values)
     template = loader.get_template('strokes/index.html')
