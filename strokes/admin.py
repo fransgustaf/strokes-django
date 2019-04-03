@@ -7,7 +7,7 @@ from .models import RecognitionSetting
 from .models import Document
 from .models import Page
 from .models import Field
-from .models import Recognition
+from .models import RecognitionResult
 from .models import RecognitionCandidate
 from .models import Stroke
 from .models import Dot
@@ -20,7 +20,7 @@ admin.site.register(RecognitionSetting)
 admin.site.register(Document)
 admin.site.register(Page)
 admin.site.register(Field)
-admin.site.register(Recognition)
+admin.site.register(RecognitionResult)
 admin.site.register(RecognitionCandidate)
 admin.site.register(Stroke)
 admin.site.register(Dot)

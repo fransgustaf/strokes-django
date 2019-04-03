@@ -13,9 +13,18 @@
 	function init() {
         canvas = document.getElementById('can');
         ctx = canvas.getContext("2d");
+
+    var background = new Image();
+    //background.src = "https://s3-ap-southeast-1.amazonaws.com/fs-background-images/" +  address + ".jpeg"
+
+    background.onload = function(){
+    //ctx.drawImage(background,0,0);
+    }
+
+    
         console.log("number of strokes " + dataset.data.length)
 		for (i = 0; i < dataset.data.length; i++) {
-			console.log("iiiiii " + i)
+			//console.log("iiiiii " + i)
 
         	draw(dataset.data[i].dots);
     	}
@@ -27,7 +36,7 @@
     	var prevX = dots[0].x * scale;
     	var prevY = dots[0].y * scale;
 		for (j = 1; j < dots.length; j++) {
-			console.log("jjjjjjjj " + j)
+			//console.log("jjjjjjjj " + j)
 			console.log("drawing " + prevX + " " + prevY + " " + dots[j].x + " " + dots[j].y);
 			ctx.beginPath();
 			ctx.moveTo(prevX, prevY);
@@ -43,7 +52,8 @@
 
     </script>
     <body onload="init()">
-        <canvas id="can" width="630" height="891"></canvas>
+
+        <canvas id="can" width="630" height="891" style="background:url(https://s3-ap-southeast-1.amazonaws.com/fs-background-images/{{address}}.jpeg); background-size: 100% 100%;"></canvas>
 	<div>{{ recognition_value }}</div>
     </body>
     </html>

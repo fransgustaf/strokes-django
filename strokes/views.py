@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
-from .models import Document, Page, Stroke, Dot
+from .models import Document, Page, Stroke, Dot, RecognitionResult
 from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
 import json
 
 from django.utils.safestring import mark_safe
@@ -32,19 +33,25 @@ def index(request):
     values = []
     
     pages = document.page_set
+    address = ''
     if pages.exists():
+        address = pages.first().address
         for field in pages.first().field_set.all():
-            recognitions = field.recognition_set
-            if recognitions.exists():
-                recognition_candidate = recognitions.first().recognitioncandidate_set.first()
+            recognition_results = RecognitionResult.objects.filter(field_id=field.id)
+            if recognition_results.exists() :
+                recognition_candidate = recognition_results.first().recognitioncandidate_set.first()
                 # Todo Need to set selected condidate id correctly first, ideally as a nullable foriegn key.
                 # recognition_candidate = RecognitionCandidate.objects.get(id=Recognition.objects.get(field_id=field.id).selected_candidate_id)
                 values.append(recognition_candidate.value)
 
     print(values)
+    print(address)
     template = loader.get_template('strokes/index.html')
     context = {
         'strokes_data': mark_safe(json.dumps(json_data)),
         'recognition_value': ", ".join(values),
+        'address': address,
     }
     return HttpResponse(template.render(context, request))
+
+
