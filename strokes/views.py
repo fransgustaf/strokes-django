@@ -35,15 +35,13 @@ def index(request):
     
     pages = document.page_set
     address = ''
-    if pages.exists():
-        address = pages.first().address
-        for field in pages.first().field_set.all():
-            recognition_results = RecognitionResult.objects.filter(field_id=field.id)
-            if recognition_results.exists() :
-                recognition_candidate = recognition_results.first().recognitioncandidate_set.first()
-                # Todo Need to set selected condidate id correctly first, ideally as a nullable foriegn key.
-                # recognition_candidate = RecognitionCandidate.objects.get(id=Recognition.objects.get(field_id=field.id).selected_candidate_id)
-                values.append(recognition_candidate.value)
+    for field in page.field_set.all():
+        recognition_results = RecognitionResult.objects.filter(field_id=field.id)
+        if recognition_results.exists() :
+            recognition_candidate = recognition_results.first().recognitioncandidate_set.first()
+            # Todo Need to set selected condidate id correctly first, ideally as a nullable foriegn key.
+            # recognition_candidate = RecognitionCandidate.objects.get(id=Recognition.objects.get(field_id=field.id).selected_candidate_id)
+            values.append(recognition_candidate.value)
 
     print(values)
     print(address)
