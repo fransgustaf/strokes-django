@@ -9,23 +9,24 @@ import json
 from django.utils.safestring import mark_safe
 
 def index(request):
-    doc_id = request.GET.get('doc', '')
+    doc_id = request.GET.get('document', '')
+    page_number = 1 if request.GET.get('page', '') == '' else request.GET.get('page', '')
 
     if doc_id:
         document = Document.objects.get(id=doc_id)
     else:
         document = Document.objects.latest('id')
         
-    print(document)
+    print("document {0} page {1}".format(document.id, page_number))
 
     strokes_data = []
-    for page in document.page_set.all():
-        for stroke in page.stroke_set.all():
-            stroke_data = []
-            for dot in stroke.dot_set.all():
+    page = Page.objects.get(document_id=document.id, number=page_number)
+    for stroke in page.stroke_set.all():
+        stroke_data = []
+        for dot in stroke.dot_set.all():
                 #stroke.append(serializers.serialize("json", [stroke, ]))
-                stroke_data.append({"x": float(dot.x), "y": float(dot.y)})
-            strokes_data.append({"dots": stroke_data})
+            stroke_data.append({"x": float(dot.x), "y": float(dot.y)})
+        strokes_data.append({"dots": stroke_data})
 
     json_data = {"data": strokes_data}
     #print(json_data)
@@ -53,5 +54,3 @@ def index(request):
         'address': address,
     }
     return HttpResponse(template.render(context, request))
-
-
