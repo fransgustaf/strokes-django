@@ -19,16 +19,8 @@ def index(request):
         
     print("document {0} page {1}".format(document.id, page_number))
 
-    strokes_data = []
     page = Page.objects.get(document_id=document.id, number=page_number)
-    for stroke in page.stroke_set.all():
-        stroke_data = []
-        for dot in stroke.dot_set.all():
-                #stroke.append(serializers.serialize("json", [stroke, ]))
-            stroke_data.append({"x": float(dot.x), "y": float(dot.y)})
-        strokes_data.append({"dots": stroke_data})
-
-    json_data = {"data": strokes_data}
+    json_data = {"data": page.get_strokes_as_json()}
     #print(json_data)
 
     values = []
