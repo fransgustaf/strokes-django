@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from .models import Customer
 from .models import DocumentSetting
 from .models import PageSetting
 from .models import FieldSetting
@@ -13,6 +14,7 @@ from .models import Stroke
 from .models import Dot
 
 # Register your models here.
+admin.site.register(Customer)
 admin.site.register(DocumentSetting)
 admin.site.register(PageSetting)
 admin.site.register(FieldSetting)
