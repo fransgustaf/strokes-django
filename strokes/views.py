@@ -1,12 +1,67 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
-from .models import Document, Page, Stroke, Dot, RecognitionResult
+from .models import Document, Page, Stroke, Dot, RecognitionResult, Field
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 import json
 
 from django.utils.safestring import mark_safe
+
+from rest_framework import generics
+from .serializers import *
+
+class DocumentList(generics.ListCreateAPIView):
+    queryset = Document.objects.all()
+    serializer_class = DocumentSerializer
+
+
+class DocumentDetails(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Document.objects.all()
+    serializer_class = DocumentSerializer
+    lookup_url_kwarg = 'document_pk'
+
+
+class DocumentPageList(generics.ListCreateAPIView):
+    serializer_class = PageSerializer
+    
+    def get_queryset(self):
+        queryset = Page.objects.all()
+        document_pk = self.kwargs.get(DocumentDetails.lookup_url_kwarg)
+        return Page.objects.filter(document_id=document_pk)
+
+
+class PageDetails(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = PageSerializer
+    lookup_url_kwarg = 'page_pk'
+
+    def get_queryset(self):
+        page_pk = self.kwargs.get(self.lookup_url_kwarg)
+        return Page.objects.filter(id=page_pk)
+
+class PageStrokeList(generics.ListCreateAPIView):
+    serializer_class = StrokeSerializer
+    lookup_url_kwarg = 'page_pk'
+
+    def get_queryset(self):
+        queryset = Page.objects.all()
+        page_pk = self.kwargs.get(self.lookup_url_kwarg)
+        pages = Page.objects.filter(id=page_pk)
+        return Stroke.objects.filter(page_id=page_pk)
+
+class PageFieldList(generics.ListCreateAPIView):
+    serializer_class = FieldSerializer
+    lookup_url_kwarg = 'page_pk'
+    def get_queryset(self):
+        page_pk = self.kwargs.get(self.lookup_url_kwarg)
+        
+        return Field.objects.filter(page_id=page_pk)
+
+
+
+
+
+
 
 def index(request):
     doc_id = request.GET.get('document', '')

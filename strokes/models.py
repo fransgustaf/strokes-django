@@ -38,6 +38,7 @@ class PageSetting(models.Model):
     number = models.IntegerField(null=False)
     width = models.DecimalField(max_digits=20, decimal_places=6)
     height = models.DecimalField(max_digits=20, decimal_places=6)
+    default_background_url = models.CharField(max_length=100)
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     class Meta:
@@ -52,7 +53,7 @@ class PageSetting(models.Model):
         if page_settings.exists():
             page_setting = page_settings.first()
         else:
-            page_setting = PageSetting(document_setting_id=document_setting_id, number=input_page_setting['number'], width=input_page_setting['width'], height=input_page_setting['height'], customer_id=customer_id)
+            page_setting = PageSetting(document_setting_id=document_setting_id, number=input_page_setting['number'], width=input_page_setting['width'], height=input_page_setting['height'], default_background_url=input_page_setting["default_background_url"], customer_id=customer_id)
             page_setting.save()
 
         print(input_page_setting['fieldSettings'])
@@ -170,6 +171,7 @@ class Page(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
     address = models.CharField(max_length=50, default=uuid.uuid4)
     number = models.IntegerField(null=False)
+    background_url = models.CharField(max_length=100)
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     class Meta:
@@ -212,10 +214,22 @@ class Page(models.Model):
             page.save()
         else:
             page_setting = PageSetting.objects.get(document_setting_id=document.document_setting_id, number=1 if page_number is None else page_number, customer_id=customer_id)
-            page = Page(page_setting_id=page_setting.id, document_id=document.id, address=uuid.uuid4() if page_address is None else page_address, number= 1 if page_number is None else page_number, customer_id=customer_id)
+
+            page = Page(
+                page_setting_id=page_setting.id,
+                document_id=document.id,
+                address=uuid.uuid4() if page_address is None else page_address,
+                number= 1 if page_number is None else page_number,
+                background_url=page_setting.default_background_url,
+                customer_id=customer_id,
+                )
             page.save()
             for field_setting in FieldSetting.objects.filter(page_setting_id=page_setting.id, customer_id=customer_id):
-                field = Field(page_id=page.id, field_setting_id=field_setting.id, customer_id=customer_id)
+                field = Field(
+                    page_id=page.id,
+                    field_setting_id=field_setting.id,
+                    customer_id=customer_id,
+                    )
                 field.save()
             print("new page {0} {1}".format(page.id, page.address))
 
@@ -259,7 +273,7 @@ class Field(models.Model):
 
 
 class RecognitionResult(models.Model):
-    field = models.OneToOneField(Field, on_delete=models.CASCADE, primary_key=False)
+    field = models.ForeignKey(Field, on_delete=models.CASCADE)
     selected_candidate_id = models.IntegerField(null=True)
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
